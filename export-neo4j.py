@@ -41,13 +41,15 @@ with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE=
         if not rows:
             break
 
-        i = 0
         for row in rows:
             # Créer un objet Node avec comme label Film et les propriétés adéquates
             # A COMPLETER
-            print(row)
-            importData.append(row)
-            i += 1
+            
+            importData.append({
+                "idFilm": row[0],
+                "primaryTitle": row[1],
+                "startYear": row[2]
+            })
 
         try:
             create_nodes(graph.auto(), importData, labels={"Film"})
@@ -59,12 +61,11 @@ with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE=
     # Names
     # En vous basant sur ce qui a été fait dans la section précédente, exportez les données de la table tNames
     # A COMPLETER
-
     try:
         print("Indexing Film nodes...")
-        graph.run("CREATE INDEX ON :Film(idFilm)")
+        graph.run("CREATE INDEX FOR (f:Film) ON (f.idFilm)")
         print("Indexing Name (Artist) nodes...")
-        graph.run("CREATE INDEX ON :Artist(idArtist)")
+        graph.run("CREATE INDEX FOR (a:Artist) ON (a.idArtist)")
     except Exception as error:
         print(error)
 
@@ -82,7 +83,9 @@ with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE=
 
         for row in rows:
             relTuple=(row[0], {}, row[2])
-            importData[row[1]].append(relTuple)
+            category = row[1].replace(" ", "_")  # Remplace les espaces par des underscores dans les noms de relation
+            if category in importData:
+                importData[category].append(relTuple)
 
         try:
             for cat in importData:
