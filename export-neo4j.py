@@ -45,7 +45,8 @@ with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE=
         for row in rows:
             # Créer un objet Node avec comme label Film et les propriétés adéquates
             # A COMPLETER
-            importData.append(n)
+            print(row)
+            importData.append(row)
             i += 1
 
         try:
